@@ -29,5 +29,8 @@
     <string name="no_appliance">No appliances added yet.</string>
     <string name="room_count_exceed_message">You can not add more rooms as you can reach to maximum value.</string>
     <string name="appliance_count_exceed_message">You can not add more appliances as you can reach to maximum value.</string>
+    <string name="denied_location_dialog_message">You have to enable your location. So that app works smoothly. Please enable location and RETRY.</string>
+
+
 
 </resources>

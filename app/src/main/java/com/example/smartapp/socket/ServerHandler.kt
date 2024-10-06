@@ -15,11 +15,11 @@ object ServerHandler {
     var webSocket: WebSocket? =null
 
     @Synchronized
-    fun setSocket(){
+    fun setSocket(socketUrl: String = AppConstants.SOCKET_URL){
         try {
             val client = OkHttpClient()
 
-            val request = Request.Builder().url(AppConstants.WEB_SOCKET_URL).build()
+            val request = Request.Builder().url(socketUrl).build()
             webSocket = client.newWebSocket(request, MyWebSocketListener())
 
             client.dispatcher.executorService.shutdown()

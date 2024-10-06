@@ -114,7 +114,7 @@ class AppliancesFragment : Fragment(), ItemListener , OptionSelectListener {
 
             fetchRoomApplianceData(requireContext())
         }
-
+        println(">>>> DATA: ${Gson().toJson(updatedAppliance)}")
         // Socket Event: Update toggle status on server
         ServerHandler.webSocket?.let {
             val data = SocketMessageModel(
@@ -125,8 +125,10 @@ class AppliancesFragment : Fragment(), ItemListener , OptionSelectListener {
 
            /* if (it.connected())
                 it.emit(AppConstants.SOCKET_EVENT, Gson().toJson(data))
-*/
-                it.send( Gson().toJson(data))
+            */
+
+
+            it.send( Gson().toJson(data))
 
         }
 
@@ -157,6 +159,7 @@ class AppliancesFragment : Fragment(), ItemListener , OptionSelectListener {
                   /*      if (it.connected())
                             it.emit(AppConstants.SOCKET_EVENT, Gson().toJson(data))
                    */
+                        println(">>>> DATA: ${Gson().toJson(data)}")
                             it.send(Gson().toJson(data))
 
 

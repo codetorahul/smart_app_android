@@ -22,14 +22,23 @@ object AppConstants {
     // Option Type
     const val OPTION_DELETE = "optionDelete"
     const val OPTION_RENAME = "optionRename"
+
+    // Dialog options
     const val OPTION_YES = "YES"
-    const val OPTION_NO = "NO"
+    const val OPTION_CANCEL = "cancel"
 
     // Socket
+    // for testing
+    // const val WEB_SOCKET_URL = "ws://192.168.0.199:8080"
+
     //const val WEB_SOCKET_URL = "ws://10.0.2.2:8080"
     const val WEB_SOCKET_URL = "ws://192.168.4.1:8080"
- //   const val SOCKET_URL = "http://10.0.2.2:8000"
-  //  const val SOCKET_URL = "http://192.168.4.1:8080"
+    //   const val SOCKET_URL = "http://10.0.2.2:8000"
+    //  const val SOCKET_URL = "http://192.168.4.1:8080"
+
+    const val SOCKET_URL = WEB_SOCKET_URL
+    const val IP_4TH_VALUE = "250"
+
     const val SOCKET_EVENT = "info"
     const val TYPE_GENERAL = "General"
     const val TYPE_WIFI_INFO = "WifiInfo"

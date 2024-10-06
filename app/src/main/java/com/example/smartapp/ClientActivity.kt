@@ -1,6 +1,9 @@
 package com.example.smartapp
 
+import android.content.Context
+import android.net.wifi.WifiManager
 import android.os.Bundle
+import android.text.format.Formatter
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -39,9 +42,15 @@ class ClientActivity : ComponentActivity() {
                 }
             }
         }
+            val ipAddress = getWifiIpAddress()
+            println("Connected WiFi IP Address: $ipAddress")
+    }
 
-
-
+    private fun getWifiIpAddress(): String? {
+        val wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+        val wifiInfo = wifiManager.connectionInfo
+        val ip = wifiInfo.ipAddress
+        return Formatter.formatIpAddress(ip)
     }
 
     @Composable
