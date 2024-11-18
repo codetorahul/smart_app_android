@@ -94,15 +94,15 @@ class ServerConnection(val context: Context): DialogListener {
         showProgressDialog(context)
 
 
-        //TODO: UnComment Below code
-//        if(socketUrlToConnect.isNotEmpty()){
-//            ServerHandler.setSocket(socketUrlToConnect)
-//        }else{
-//            ServerHandler.setSocket()
-//        }
+        //TODO: Comment this code before using below code i.e ServerHandler.setSocket()
+        if(socketUrlToConnect.isNotEmpty()){
+            ServerHandler.setSocket(socketUrlToConnect)
+        }else{
+            ServerHandler.setSocket()
+        }
 
-        //TODO: REMOVE BELOW CODE.ITS ONLY FOR TESTING
-        ServerHandler.setSocket()
+        //TODO: BELOW CODE is ONLY FOR TESTING
+      //  ServerHandler.setSocket()
 
         webSocket = ServerHandler.webSocket
 

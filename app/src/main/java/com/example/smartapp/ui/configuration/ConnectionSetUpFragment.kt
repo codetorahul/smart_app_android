@@ -97,8 +97,11 @@ class ConnectionSetUpFragment : Fragment(), DialogListener {
             if( it.connectionStatus == CONNECTION_SUCCESS){
                 isConnected = true
                try {
-                   //TODO: Remove below code ..it is for temporory use. Replace it with (fetchedMacAddress = it.receivedMacAddress)
-                   fetchedMacAddress = Integer.parseInt(it.receivedMacAddress).toString()
+                   //TODO: Below code is for testing. UNComment and Use.
+                  // fetchedMacAddress = Integer.parseInt(it.receivedMacAddress).toString()
+
+                   // TODO: Comment below code if you want to use above code .
+                   fetchedMacAddress = it.receivedMacAddress
                }catch (error:Error){
 
                }

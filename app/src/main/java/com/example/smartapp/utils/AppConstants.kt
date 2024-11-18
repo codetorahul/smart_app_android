@@ -35,10 +35,12 @@ object AppConstants {
     // for testing
     // const val WEB_SOCKET_URL = "ws://192.168.0.199:8080"
 
-    const val WEB_SOCKET_URL = "ws://10.0.2.2:8080"
+    //TODO: Code for testing.
+   // const val WEB_SOCKET_URL = "ws://10.0.2.2:8080"
 
-    // uncomment below code
-    //const val WEB_SOCKET_URL = "ws://192.168.4.1:8080"
+    //TODO: uncomment below code.
+    const val WEB_SOCKET_URL = "ws://192.168.4.1:8080"
+
     //   const val SOCKET_URL = "http://10.0.2.2:8000"
     //  const val SOCKET_URL = "http://192.168.4.1:8080"
 
