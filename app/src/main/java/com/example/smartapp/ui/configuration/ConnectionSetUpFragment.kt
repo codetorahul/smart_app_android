@@ -232,6 +232,7 @@ class ConnectionSetUpFragment : Fragment(), DialogListener {
 
     private fun requestLocationPermission() {
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                hideProgressBar()
             ActivityCompat.requestPermissions(requireActivity(),
                 arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
                 123)
