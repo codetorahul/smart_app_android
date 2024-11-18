@@ -4,15 +4,28 @@
     tools:context="com.asianbank.ui.settings.SettingActivity">
 
     <item
-        android:id="@+id/action_retry"
+        android:id="@+id/action_reconnect_server"
         android:orderInCategory="100"
-        android:title="@string/action_retry"
+        android:title="@string/action_reconnect"
+        android:icon="@drawable/retry"
         app:showAsAction="always"
-        android:icon="@drawable/retry"/>
+        android:visible="true"/>
+        <item
+        android:id="@+id/action_config"
+        android:orderInCategory="100"
+        android:title="@string/action_config_info"
+        android:icon="@drawable/logout"/>
+
+    <item
+        android:id="@+id/action_config_mode"
+        android:orderInCategory="100"
+        android:title="@string/action_config_mode"
+        android:icon="@drawable/logout"/>
     <item
         android:id="@+id/action_logout"
         android:orderInCategory="100"
         android:title="@string/action_logout"
-        app:showAsAction="always"
         android:icon="@drawable/logout"/>
+
+
 </menu>

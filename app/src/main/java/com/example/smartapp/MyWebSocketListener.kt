@@ -1,5 +1,6 @@
 package com.example.smartapp
 
+import com.example.smartapp.model.ConnectionModel
 import com.example.smartapp.socket.SocketMessageModel
 import com.example.smartapp.utils.AppConstants
 import com.example.smartapp.utils.AppConstants.CONNECTION_FAILED
@@ -21,12 +22,13 @@ class   MyWebSocketListener : WebSocketListener() {
 
         webSocket.send(Gson().toJson(data))
 
-        updateDataInBackground(CONNECTION_SUCCESS)
     }
 
     override fun onMessage(webSocket: WebSocket, text: String) {
         // Message received from the server
         println(">>> WEBSOCKET- Message Received : $text")
+        updateDataInBackground(ConnectionModel(CONNECTION_SUCCESS,text))
+
     }
 
     override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
@@ -42,11 +44,10 @@ class   MyWebSocketListener : WebSocketListener() {
 
     override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
         // Connection failed2
-        updateDataInBackground(CONNECTION_FAILED)
+        updateDataInBackground(ConnectionModel(CONNECTION_FAILED,""))
 
         t.printStackTrace()
         println(">>> WEBSOCKET- Failed : ${t.printStackTrace()}")
-
 
     }
 }

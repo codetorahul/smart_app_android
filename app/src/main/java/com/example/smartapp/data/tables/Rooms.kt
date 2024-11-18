@@ -1,25 +1,31 @@
-package com.example.smartapp.ui.rooms
+package com.example.smartapp.data.tables
 
+import android.os.Build
 import android.os.Parcel
 import android.os.Parcelable
+import androidx.annotation.RequiresApi
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import androidx.room.TypeConverters
 
 @Entity(tableName = "rooms")
 data class Rooms(
-    @PrimaryKey(autoGenerate = true) val roomId: Int = 0,
+    @PrimaryKey(autoGenerate = true) val _id: Int = 0,
     var roomName: String,
-    val roomColor: String
+    val roomColor: String,
+    val roomId: String,
+    val isRoomIdUpdated: Boolean =false
 ) : Parcelable {
 
-    constructor(roomName: String?, roomColor: String) : this(0, roomName!!, roomColor)
+    constructor(roomName: String?, roomColor: String, roomId: String, isRoomIdUpdated: Boolean) : this(0, roomName!!, roomColor, roomId,isRoomIdUpdated)
 
 
+    @RequiresApi(Build.VERSION_CODES.Q)
     constructor(parcel: Parcel) : this(
-       roomId =  parcel.readInt(),
+        _id=  parcel.readInt(),
+       roomId =parcel.readString()!!,
       roomName =   parcel.readString()!!,
-      roomColor=   parcel.readString()!!
+      roomColor=   parcel.readString()!!,
+      isRoomIdUpdated = parcel.readInt() !=0
     )
 
     override fun describeContents(): Int {
@@ -27,9 +33,14 @@ data class Rooms(
     }
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
-        parcel.writeInt(roomId)
+        parcel.writeInt(_id)
+        parcel.writeString(roomId)
         parcel.writeString(roomName)
         parcel.writeString(roomColor)
+
+        val intToSave = if(isRoomIdUpdated) 1 else 0
+        parcel.writeInt(intToSave)
+
 
     }
 

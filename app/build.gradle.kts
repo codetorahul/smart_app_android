@@ -4,6 +4,9 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
     id("kotlin-kapt")
+    id("com.google.gms.google-services")
+    id("androidx.navigation.safeargs.kotlin")
+
 }
 
 android {
@@ -65,6 +68,8 @@ dependencies {
     kapt ("androidx.room:room-compiler:2.6.1")
 
 
+
+
     implementation(libs.google.gson)
 
     implementation(libs.androidx.core.ktx)
@@ -88,4 +93,11 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    implementation(platform("com.google.firebase:firebase-bom:33.4.0"))
+    implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-database:20.3.0")
+    implementation("com.google.android.material:material:1.9.0")
+
+
+
 }

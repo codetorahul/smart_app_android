@@ -1,25 +1,18 @@
 package com.example.smartapp.ui.dashboard
 
 import android.Manifest
-import android.app.AlertDialog
-import android.content.BroadcastReceiver
-import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.content.pm.PackageManager
-import android.net.wifi.ScanResult
-import android.net.wifi.WifiManager
 import android.os.Bundle
-import android.text.format.Formatter
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavController
 import androidx.navigation.findNavController
-import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
@@ -27,53 +20,39 @@ import com.example.smartapp.R
 import com.example.smartapp.base.BaseActivity
 import com.example.smartapp.data.AppDatabase
 import com.example.smartapp.data.preference.PreferenceManager
+import com.example.smartapp.data.tables.AppInfo
 import com.example.smartapp.databinding.ActivityDashboardBinding
-import com.example.smartapp.listener.DialogListener
 import com.example.smartapp.listener.ItemAddListener
 import com.example.smartapp.socket.ServerHandler
-import com.example.smartapp.socket.SocketMessageModel
-import com.example.smartapp.ui.appliances.Appliances
-import com.example.smartapp.ui.appliances.AppliancesFragment
-import com.example.smartapp.ui.appliances.AppliancesFragment.Companion.selectedRoomId
+import com.example.smartapp.ui.ServerConnection
+import com.example.smartapp.ui.WifiConnection
+import com.example.smartapp.ui.configuration.ConfigurationActivity
+import com.example.smartapp.ui.configuration.ConfigurationActivity.Companion
 import com.example.smartapp.ui.login.LoginActivity
-import com.example.smartapp.ui.rooms.RoomFragment
-import com.example.smartapp.ui.rooms.Rooms
+import com.example.smartapp.ui.rooms.RoomFragmentDirections
 import com.example.smartapp.utils.AppConstants
-import com.example.smartapp.utils.AppConstants.ADD_APPLIANCES
-import com.example.smartapp.utils.AppConstants.ADD_ROOM
 import com.example.smartapp.utils.AppConstants.CONNECTION_FAILED
 import com.example.smartapp.utils.AppConstants.CONNECTION_SUCCESS
-import com.example.smartapp.utils.AppConstants.IP_4TH_VALUE
-import com.example.smartapp.utils.AppConstants.OPTION_CANCEL
-import com.example.smartapp.utils.AppConstants.WIFI_PASSWORD
-import com.example.smartapp.utils.checkLocation
-import com.example.smartapp.utils.getPortFromUrl
-import com.example.smartapp.utils.getSchemeFromUrl
 import com.example.smartapp.utils.globalLiveData
 import com.example.smartapp.utils.hideProgressBar
 import com.example.smartapp.utils.showConfirmationDialog
-import com.example.smartapp.utils.showCustomDialog
-import com.example.smartapp.utils.showEditTextDialog
-import com.example.smartapp.utils.showProgressDialog
+import com.example.smartapp.utils.showSnackBar
 import com.example.smartapp.utils.showToast
-import com.google.gson.Gson
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import okhttp3.WebSocket
 
 
-class DashboardActivity : BaseActivity(), ItemAddListener , DialogListener {
+class DashboardActivity : BaseActivity(), ItemAddListener {
 
-    //  private var socket: Socket?=null
-    private var webSocket: WebSocket?=null
+    private var serverConnection: ServerConnection?= null
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityDashboardBinding
-    private  var isConnected = false
-    private var alertBuilder: AlertDialog? = null
-    private  var wifiManager: WifiManager? = null
+    private lateinit var wifiConnection: WifiConnection
 
+    private  var isConnected = false
+    private var navController : NavController? = null
     companion object{
         var IS_CONNECTED_TO_DEVICE_HOTSPOT = true
+        val TAG = DashboardActivity::class.java.simpleName
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -82,59 +61,26 @@ class DashboardActivity : BaseActivity(), ItemAddListener , DialogListener {
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
 
-                val navController = findNavController(R.id.nav_host_fragment_content_dashboard)
-        appBarConfiguration = AppBarConfiguration(navController.graph)
-        setupActionBarWithNavController(navController, appBarConfiguration)
+        serverConnection = ServerConnection(this)
+        wifiConnection = WifiConnection(this)
+
+        addRoomFragmentAsDefault()
+        binding.fab.visibility = View.GONE
 
         handleListener()
+
+        if(ServerHandler.webSocket == null) {
+            serverConnection!!.performServerConnection()
+        }
         manageLiveData()
-        performServerConnection()
     }
 
-
-    private fun getWifiIpAddress(): String? {
-        wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
-        val wifiInfo = wifiManager!!.connectionInfo
-        val ip = wifiInfo.ipAddress
-        return Formatter.formatIpAddress(ip)
-    }
-
-    private  fun getModifiedIp() :String?{
-        val ipAddress =  getWifiIpAddress()
-        println(">>>> Fetched- IP Address: $ipAddress")
-
-        ipAddress?.let {
-            var socketUrl =  AppConstants.SOCKET_URL.replace("ws://","")
-            socketUrl =  socketUrl.replace("http://","")
-            socketUrl =  socketUrl.replace(":8080","")
-            println(">>>> To Match-  IP Address: $socketUrl")
-
-            IS_CONNECTED_TO_DEVICE_HOTSPOT = ipAddress == socketUrl
-
-            if (ipAddress == socketUrl){
-                // it means mobile is connected to hotspot generated by hardware device.
-                return AppConstants.SOCKET_URL
-            }
-            // it means mobile is connected to wifi of home. Hence changing 4th value of ip and making a server address from ip address.
-            return  modifyIpAddress(ipAddress,IP_4TH_VALUE)
-        }
-        return  null
-    }
-
-    private fun modifyIpAddress(ipAddress: String, newFourthValue: String): String {
-        // Split the IP address by "."
-        val parts = ipAddress.split(".").toMutableList()
-
-        // Check if it's a valid IP address with exactly 4 parts
-        if (parts.size != 4) {
-            throw IllegalArgumentException("Invalid IP address format")
-        }
-
-        // Replace the 4th part (index 3) with the new value
-        parts[3] = newFourthValue
-
-        // Join the parts back into a single string
-        return getSchemeFromUrl(AppConstants.SOCKET_URL)+"://"+ parts.joinToString(".")+":"+getPortFromUrl(AppConstants.SOCKET_URL)
+    private fun addRoomFragmentAsDefault() {
+        val action = RoomFragmentDirections.actionRoomFragment(TAG)
+        navController = findNavController(R.id.nav_host_fragment_content_dashboard)
+        navController!!.navigate(action)
+        appBarConfiguration = AppBarConfiguration(navController!!.graph)
+        setupActionBarWithNavController(navController!!, appBarConfiguration)
     }
 
 
@@ -142,28 +88,18 @@ class DashboardActivity : BaseActivity(), ItemAddListener , DialogListener {
 
         globalLiveData.observe(this){
             hideProgressBar()
-            if( it == CONNECTION_SUCCESS){
+            if( it.connectionStatus == CONNECTION_SUCCESS){
                 isConnected = true
-                showToast(applicationContext, "Connected to Server")
-                if(checkLocation(this, this) && !IS_CONNECTED_TO_DEVICE_HOTSPOT) {
-                    requestLocationPermission()
-                }
-            }else if (it == CONNECTION_FAILED){
-                alertBuilder?.dismiss()
-                if(!isConnected){
-                    runOnUiThread {
-                        showToast(applicationContext, "It seems server is not running.")
-                    }
-                }else{
-                    runOnUiThread {
-                        showToast(applicationContext, "Dis-Connected from Server")
-                    }
-                }
+                showSnackBar(this@DashboardActivity, "Connected to Server")
 
-                // code for testing only
-              /*  if(checkLocation(this, this)) {
-                    requestLocationPermission()
-                }*/
+            }else if (it.connectionStatus == CONNECTION_FAILED){
+                wifiConnection.dismissDialog()
+                if(!isConnected){
+                    showSnackBar(this@DashboardActivity, "It seems server is not running.")
+
+                }else{
+                    showSnackBar(this@DashboardActivity, "Dis-Connected from Server")
+                }
 
                 isConnected= false
             }
@@ -172,84 +108,87 @@ class DashboardActivity : BaseActivity(), ItemAddListener , DialogListener {
     }
 
     private fun handleListener() {
-        binding.fab.setOnClickListener { view ->
-            val navHostFragment =
-                supportFragmentManager.findFragmentById(R.id.nav_host_fragment_content_dashboard) as NavHostFragment
-            val currentFragment = navHostFragment.childFragmentManager.fragments.lastOrNull()
-
-            lifecycleScope.launch(Dispatchers.IO) {
-                if (currentFragment is RoomFragment) {
-                    val roomCount =
-                        AppDatabase.getDatabase(this@DashboardActivity).roomDao().getRoomsCount()
-                    runOnUiThread {
-                        if (roomCount >= AppConstants.THRESHOLD_ROOMS) {
-                            showToast(
-                                applicationContext,
-                                getString(R.string.room_count_exceed_message)
-                            )
-                        } else {
-                            showEditTextDialog(
-                                this@DashboardActivity,
-                                title = "ADD ROOM",
-                                typeOfDialog = ADD_ROOM
-                            ) {
-
-                                if (currentFragment is RoomFragment) {
-                                    val roomName = it as String
-                                    val room = Rooms(roomName, "")
-                                    lifecycleScope.launch(Dispatchers.IO) {
-                                        AppDatabase.getDatabase(this@DashboardActivity).roomDao()
-                                            .insertRoom(room)
-
-                                        val navHostFragment =
-                                            supportFragmentManager.findFragmentById(R.id.nav_host_fragment_content_dashboard) as NavHostFragment
-                                        val currentFragment =
-                                            navHostFragment.childFragmentManager.fragments.lastOrNull()
-
-                                        if (currentFragment is RoomFragment) {
-                                            (currentFragment).fetchRoomData(this@DashboardActivity)
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                } else {
-                    val applianceCount = AppDatabase.getDatabase(this@DashboardActivity).applianceDao().getApplianceCountByRoomId(selectedRoomId)
-
-                    runOnUiThread {
-                        if (applianceCount >= AppConstants.THRESHOLD_APPLIANCES) {
-                            showToast(applicationContext, getString(R.string.appliance_count_exceed_message))
-                        } else {
-                            runOnUiThread {
-                                showEditTextDialog(
-                                    this@DashboardActivity,
-                                    title = "ADD APPLIANCE",
-                                    typeOfDialog = ADD_APPLIANCES
-                                ) {
-                                    val appliance = it
-
-                                    val appliances = Appliances(
-                                        roomId = selectedRoomId!!,
-                                        applianceName = appliance,
-                                        applianceStatus = false,
-                                        applianceColor = ""
-                                    )
-                                    lifecycleScope.launch(Dispatchers.IO) {
-                                        AppDatabase.getDatabase(this@DashboardActivity)
-                                            .applianceDao().insertAppliance(appliances)
-
-                                        if (currentFragment is AppliancesFragment) {
-                                            (currentFragment).fetchRoomApplianceData(this@DashboardActivity)
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
+//        binding.fab.setOnClickListener { view ->
+//            val navHostFragment =
+//                supportFragmentManager.findFragmentById(R.id.nav_host_fragment_content_dashboard) as NavHostFragment
+//            val currentFragment = navHostFragment.childFragmentManager.fragments.lastOrNull()
+//
+//            lifecycleScope.launch(Dispatchers.IO) {
+//                if (currentFragment is RoomFragment) {
+//                    val roomCount =
+//                        AppDatabase.getDatabase(this@DashboardActivity).roomDao().getRoomsCount()
+//                    runOnUiThread {
+//                        if (roomCount >= AppConstants.THRESHOLD_ROOMS) {
+//                            showToast(
+//                                applicationContext,
+//                                getString(R.string.room_count_exceed_message)
+//                            )
+//                        } else {
+//                            showEditTextDialog(
+//                                this@DashboardActivity,
+//                                title = "ADD ROOM",
+//                                typeOfDialog = ADD_ROOM
+//                            ) {
+//
+//                                if (currentFragment is RoomFragment) {
+//                                    val roomName = it as String
+//                                    val room = Rooms(roomName, "")
+//                                    lifecycleScope.launch(Dispatchers.IO) {
+//                                        AppDatabase.getDatabase(this@DashboardActivity).roomDao()
+//                                            .insertRoom(room)
+//
+//                                        val navHostFragment =
+//                                            supportFragmentManager.findFragmentById(R.id.nav_host_fragment_content_dashboard) as NavHostFragment
+//                                        val currentFragment =
+//                                            navHostFragment.childFragmentManager.fragments.lastOrNull()
+//
+//                                        if (currentFragment is RoomFragment) {
+//                                            (currentFragment).fetchRoomData(this@DashboardActivity)
+//                                        }
+//                                    }
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//                else
+//                { // Appliance Fragment
+//                    val applianceCount = AppDatabase.getDatabase(this@DashboardActivity).applianceDao().getApplianceCountByRoomId(selectedRoomId)
+//
+//                    runOnUiThread {
+//                        if (applianceCount >= AppConstants.THRESHOLD_APPLIANCES) {
+//                            showToast(applicationContext, getString(R.string.appliance_count_exceed_message))
+//                        } else {
+//                            runOnUiThread {
+//                                showEditTextDialog(
+//                                    this@DashboardActivity,
+//                                    title = "ADD APPLIANCE",
+//                                    typeOfDialog = ADD_APPLIANCES
+//                                ) {
+//                                    val appliance = it
+//
+//                                    val appliances = Appliances(
+//                                        roomId = selectedRoomId!!,
+//                                        applianceName = appliance,
+//                                        applianceStatus = false,
+//                                        applianceColor = "",
+//                                        applianceId = "R1"
+//                                    )
+//                                    lifecycleScope.launch(Dispatchers.IO) {
+//                                        AppDatabase.getDatabase(this@DashboardActivity)
+//                                            .applianceDao().insertAppliance(appliances)
+//
+//                                        if (currentFragment is AppliancesFragment) {
+//                                            (currentFragment).fetchRoomApplianceData(this@DashboardActivity)
+//                                        }
+//                                    }
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        }
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -258,13 +197,28 @@ class DashboardActivity : BaseActivity(), ItemAddListener , DialogListener {
                 || super.onSupportNavigateUp()
     }
 
+    override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
+        menu?.findItem(R.id.action_reconnect_server)!!.isVisible = !isConnected
+        return super.onPrepareOptionsMenu(menu)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.custom_menu, menu);
+
+        return true
+    }
 
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         val id = item.itemId
 
         // Example: handle different menu items
-        if (id == com.example.smartapp.R.id.action_logout) {
+
+        if (id == R.id.action_reconnect_server) {
+            serverConnection?.performServerConnection()
+            return true
+        }
+       else if (id == R.id.action_logout) {
             showConfirmationDialog(this, getString(R.string.logout_text)){
                 PreferenceManager.getInstance(this)!!.putBoolean(AppConstants.IS_LOGGED_IN, false)
                 startActivity(Intent(this, LoginActivity::class.java))
@@ -272,31 +226,37 @@ class DashboardActivity : BaseActivity(), ItemAddListener , DialogListener {
             }
             return true
         }
-        else if (id == com.example.smartapp.R.id.action_retry) {
-            performServerConnection()
+        else if (id == R.id.action_config) {
+            navController?.navigate(R.id.action_Room_to_Config)
+            return true
+        }
+        else if (id == R.id.action_config_mode) {
+            showConfirmationDialog(this, getString(R.string.switch_text)){
+                addOrUpdateAppInfoDataToDB()
+                startActivity(Intent(this, ConfigurationActivity::class.java))
+                finish()
+            }
             return true
         }
         return super.onOptionsItemSelected(item)
     }
 
 
-    fun performServerConnection(){
-        if(checkLocation(this, this)) {
-            val socketUrlToConnect = getModifiedIp()
-            println(">>>> Modified- IP Address: $socketUrlToConnect")
-
-            if (!socketUrlToConnect.isNullOrEmpty()) {
-                showToast(this@DashboardActivity, socketUrlToConnect)
-                connectToWebSocket(socketUrlToConnect)
-            } else {
-                showToast(this, "An error occurred.Please try again later.")
+    private fun addOrUpdateAppInfoDataToDB() {
+        lifecycleScope.launch {
+            val appInfoDao = AppDatabase.getDatabase(this@DashboardActivity).appInfoDao()
+            val fetchedAppInfoDao = appInfoDao.getAppInfo()
+            if (fetchedAppInfoDao == null) {
+                val addInfo =
+                    AppInfo(isDevicesAddedInConfigMode = false, isMacAddressUpdated = false)
+                appInfoDao.insertInfo(addInfo)
+            }else {
+                   appInfoDao.updateMacAddressStatus(false, fetchedAppInfoDao._id)
             }
-        }
     }
+}
 
-    override fun onItemAddClick(item: Any) {
-
-    }
+    override fun onItemAddClick(item: Any) {}
 
     private fun requestLocationPermission() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -304,7 +264,7 @@ class DashboardActivity : BaseActivity(), ItemAddListener , DialogListener {
                 arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
                 123)
         }else{
-            scanWifiNetworks()
+            wifiConnection.scanWifiNetworks()
         }
     }
 
@@ -313,7 +273,7 @@ class DashboardActivity : BaseActivity(), ItemAddListener , DialogListener {
         if (requestCode == 123) {
             if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
                 // Permission granted, now you can scan for Wi-Fi networks
-                scanWifiNetworks()
+                wifiConnection.scanWifiNetworks()
             } else {
                 // Permission denied
                 Toast.makeText(applicationContext, "Location permission is required to scan Wi-Fi networks", Toast.LENGTH_SHORT).show()
@@ -321,100 +281,6 @@ class DashboardActivity : BaseActivity(), ItemAddListener , DialogListener {
         }
     }
 
-    private fun scanWifiNetworks() {
-        val wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
-
-        // Ensure Wi-Fi is enabled
-        if (!wifiManager.isWifiEnabled) {
-            wifiManager.isWifiEnabled = true
-        }
-
-        // Register a broadcast receiver to get scan results
-        val wifiScanReceiver = object : BroadcastReceiver() {
-            override fun onReceive(context: Context?, intent: Intent?) {
-                val success = intent?.getBooleanExtra(WifiManager.EXTRA_RESULTS_UPDATED, false) ?: false
-                if (success) {
-                    if (ActivityCompat.checkSelfPermission(
-                            this@DashboardActivity,
-                            Manifest.permission.ACCESS_FINE_LOCATION
-                        ) != PackageManager.PERMISSION_GRANTED
-                    ) {
-                        return
-                    }
-                    println("::::::::: WIFI FETCHED")
-                    showToast(applicationContext, "::::::::: WIFI FETCHED")
-                    getScanResults(wifiManager.scanResults)
-                    unregisterReceiver(this)
-                } else {
-                    // Scan failed
-                    Toast.makeText(applicationContext, "Wi-Fi scan failed", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
-
-        val intentFilter = IntentFilter()
-        intentFilter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)
-        registerReceiver(wifiScanReceiver, intentFilter)
-
-        // Start a Wi-Fi scan
-        val success = wifiManager.startScan()
-        if (!success) {
-
-            if(this.wifiManager !=null && this.wifiManager!!.scanResults.isNotEmpty()) {
-                getScanResults(this.wifiManager!!.scanResults)
-            }else{
-
-                // Scan failed
-                Toast.makeText(this, "Wi-Fi scan failed to start", Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
-
-    private fun getScanResults(scanResults: List<ScanResult>) {
-//        val scwifiManageranResults = wifiManager.scanResults
-//        for (scanResult in scanResults) {
-//            Log.d("WiFiScan", "SSID: ${scanResult.SSID}, BSSID: ${scanResult.BSSID}, Signal: ${scanResult.level}")
-//        }
-
-        for (scanResult in scanResults) {
-            Log.d("WiFiScan", "SSID: ${scanResult.SSID}, BSSID: ${scanResult.BSSID}, Signal: ${scanResult.level}")
-        }
-
-        val wifiList = scanResults.map { "${it.SSID} (${it.BSSID})" }
-
-        val builder = AlertDialog.Builder(this)
-        builder.setTitle("Available Wi-Fi Networks")
-        builder.setItems(wifiList.toTypedArray()) { dialog, which ->
-            // Handle Wi-Fi network selection
-            val selectedNetwork = scanResults[which]
-
-            showEditTextDialog(
-                this,
-                positiveButton = "SEND",
-                title = selectedNetwork.SSID,
-                nameToUpdate = "",
-                typeOfDialog = WIFI_PASSWORD
-            ){
-                val password = it
-
-                // Socket Event: Update toggle status on server
-                ServerHandler.webSocket?.let { it ->
-                    val data = SocketMessageModel(
-                        type = AppConstants.TYPE_WIFI_INFO,
-                        ssdId = selectedNetwork.SSID,
-                        password = password)
-
-                    /*if (it.connected())
-                        it.emit(AppConstants.SOCKET_EVENT, Gson().toJson(data))*/
-
-                    it.send(Gson().toJson(data))
-                }
-            }
-        }
-
-        alertBuilder = builder.create()
-        alertBuilder!!.show()
-    }
 
     /* private fun connectToSocket(){
           ServerHandler.setSocket()
@@ -437,36 +303,13 @@ class DashboardActivity : BaseActivity(), ItemAddListener , DialogListener {
 
       }*/
 
-    private fun connectToWebSocket(socketUrlToConnect : String=""){
-        showProgressDialog(this)
 
-        if(socketUrlToConnect.isNotEmpty()){
-            ServerHandler.setSocket(socketUrlToConnect)
-        }else{
-            ServerHandler.setSocket()
-        }
-
-        webSocket = ServerHandler.webSocket
-
-//       val data = SocketMessageModel(type = AppConstants.TYPE_WIFI_INFO, ssdId = "Rahul 5G", password = "123456")
-//       val gson = Gson().toJson(data)
-//        socket!!.emit(AppConstants.SOCKET_EVENT, gson)
-
-//        webSocket!!.to(AppConstants.SOCKET_EVENT){ args ->
-//            println(args[0])
-//
-//            if(args[0] !=null){
-//                val value = args[0] as String
-//                println("Value received: "+value)
-//            }
-//        }
-
-    }
-
-    override fun onOptionClick(optionType: String, others: Any) {
-        if(optionType == OPTION_CANCEL){
-            showCustomDialog(this, message = getString(R.string.denied_location_dialog_message)
-                , showPositiveButton = false, showNegativeButton = true, negativeText = "OK")
+    fun showAddButton(b: Boolean) {
+        if(b){
+            binding.fab.visibility = View.VISIBLE }
+        else{
+            binding.fab.visibility = View.GONE
         }
     }
+
 }

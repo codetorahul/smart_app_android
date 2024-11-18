@@ -12,8 +12,22 @@
         tools:layout="@layout/fragment_room">
 
         <action
+            android:id="@+id/action_Room_to_Config"
+            app:destination="@id/ConfigFragment"
+            />
+        <action  android:id="@+id/action_Room_to_ConnectionSetUp"
+            app:destination="@id/ConnectionSetUpFragment"/>
+
+        <action
             android:id="@+id/action_Room_to_Appliances"
-            app:destination="@id/AppliancesFragment" />
+            app:destination="@id/AppliancesFragment"
+            />
+        <action  android:id="@+id/action_Room_Fragment"
+            app:destination="@id/RoomFragment"/>
+
+        <argument android:name="screenType"
+            app:argType="string"
+            android:defaultValue=""/>
     </fragment>
     <fragment
         android:id="@+id/AppliancesFragment"
@@ -21,8 +35,37 @@
         android:label="@string/second_fragment_label"
         tools:layout="@layout/fragment_appliance">
 
+        <action  android:id="@+id/action_Appliance_to_ConnectionSetUp"
+            app:destination="@id/ConnectionSetUpFragment"/>
+
         <action
             android:id="@+id/action_Appliance_to_Room"
             app:destination="@id/RoomFragment" />
+
+        <action  android:id="@+id/action_Appliance_Fragment"
+            app:destination="@id/AppliancesFragment"/>
+
+        <argument android:name="screenType"
+            app:argType="string"
+            android:defaultValue=""/>
     </fragment>
+
+    <fragment
+        android:id="@+id/ConfigFragment"
+        android:name="com.example.smartapp.ui.configuration.ConfigFragment"
+        android:label="@string/third_fragment_label"
+        tools:layout="@layout/fragment_config"/>
+
+    <fragment
+        android:id="@+id/ConnectionSetUpFragment"
+        android:name="com.example.smartapp.ui.configuration.ConnectionSetUpFragment"
+        android:label="@string/fourth_fragment_label"
+        tools:layout="@layout/fragment_connection_setup">
+
+    <action  android:id="@+id/action_ConnectionSetUp_Fragment"
+        app:destination="@id/ConnectionSetUpFragment"/>
+    </fragment>
+
+
+
 </navigation>

@@ -5,6 +5,9 @@
     <!-- Strings used for fragments for navigation -->
     <string name="first_fragment_label">Rooms</string>
     <string name="second_fragment_label">Appliances</string>
+    <string name="third_fragment_label">Configuration Info</string>
+    <string name="fourth_fragment_label">Connection Setup</string>
+
     <string name="next">Next</string>
     <string name="previous">Previous</string>
 
@@ -19,10 +22,20 @@
     <string name="appliance_info">You can add maximum 10 appliances.</string>
 
     <string name="add_room">Add Room</string>
+
     <string name="action_logout">Logout</string>
     <string name="action_retry">Retry</string>
+    <string name="action_save">Save</string>
+    <string name="action_config_mode">Configuration Mode</string>
+    <string name="action_config_info">Config Info</string>
+    <string name="action_reconnect">Reconnect</string>
+
     <string name="logout_text">Are you sure you want to Logout?</string>
     <string name="delete_text">Are you sure you want to Delete?</string>
+    <string name="done_text">Are you sure you want to save added devices?</string>
+    <string name="save_text">Are you sure you want to save?</string>
+    <string name="switch_text">Are you sure you want to switch to Configuration Mode?</string>
+
     <string name="cancel">Cancel</string>
     <string name="add">Add</string>
     <string name="no_rooms">No rooms added yet.</string>
@@ -30,7 +43,15 @@
     <string name="room_count_exceed_message">You can not add more rooms as you can reach to maximum value.</string>
     <string name="appliance_count_exceed_message">You can not add more appliances as you can reach to maximum value.</string>
     <string name="denied_location_dialog_message">You have to enable your location. So that app works smoothly. Please enable location and RETRY.</string>
+    <string name="configuration">Configuration</string>
+<!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_configuration">Configuration Mode</string>
+    <string name="configuration_info">Configuration Info</string>
+    <string name="btn_connect_to_server">Connect to Server</string>
 
+    <string name="step1">Step 1</string>
+    <string name="step2">Step 2</string>
 
 
 </resources>

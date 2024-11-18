@@ -3,10 +3,10 @@ package com.example.smartapp.utils
 import android.R
 import android.app.Activity
 import android.content.Context
-import android.content.DialogInterface
 import android.content.Intent
 import android.location.LocationManager
 import android.provider.Settings
+import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.ProgressBar
@@ -14,8 +14,13 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.example.smartapp.data.tables.AppInfo
+import com.example.smartapp.data.tables.Rooms
 import com.example.smartapp.listener.DialogListener
+import com.example.smartapp.model.ConnectionModel
+import com.example.smartapp.utils.AppConstants.DIALOG_LOCATION_ENABLE
 import com.example.smartapp.utils.AppConstants.OPTION_CANCEL
+import com.google.android.material.snackbar.Snackbar
 import java.net.URI
 
 
@@ -23,15 +28,19 @@ fun showToast(context: Context, message: String){
     Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
 }
 
-private val _globalLiveData = MutableLiveData<String>()
-val globalLiveData: LiveData<String> get() = _globalLiveData
+fun showSnackBar(context: Context, message: String){
+    val view: View = (context as Activity).findViewById(R.id.content) // Get root view
+    Snackbar.make(view, message, Snackbar.LENGTH_SHORT).show()
+}
+private val _globalLiveData = MutableLiveData<ConnectionModel>()
+val globalLiveData: LiveData<ConnectionModel> get() = _globalLiveData
 
-fun updateData(newData: String) {
+fun updateData(newData: ConnectionModel) {
     _globalLiveData.value = newData
 }
 
 // Method to update LiveData from background thread
-fun updateDataInBackground(newData: String) {
+fun updateDataInBackground(newData: ConnectionModel) {
     _globalLiveData.postValue(newData)
 }
 
@@ -126,7 +135,7 @@ fun createLocationServiceError(activityObj: Activity, listener: DialogListener) 
             "Cancel"
         ) { dialog, id ->
             run {
-                listener.onOptionClick(OPTION_CANCEL, "")
+                listener.onOptionClick(OPTION_CANCEL, "", DIALOG_LOCATION_ENABLE)
                 dialog.dismiss()
             }
         }
@@ -165,4 +174,19 @@ fun showCustomDialog(activityObj: Activity, message: String,
     }
     val alert = builder.create()
     alert.show()
+}
+
+
+ fun isDevicesConfigured(appInfo: AppInfo?): Boolean {
+    return appInfo != null && appInfo.isDevicesAddedInConfigMode && appInfo.isMacAddressUpdated
+}
+ fun getRoomId(it: Rooms): String {
+    return if(it.isRoomIdUpdated){
+        println(">>>>>> ROOM ID UPDATED..SO RoomId:  ${it.roomId}")
+        it.roomId
+    }else {
+        println(">>>>>> Normal Combination Id:  ${it.roomId + it._id}")
+        it.roomId + it._id
+
+    }
 }

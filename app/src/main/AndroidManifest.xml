@@ -13,8 +13,10 @@
 
     <application
         android:allowBackup="true"
-        android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
+        android:backupAgent="android.app.backup.BackupAgentHelper"
+        android:restoreAnyVersion="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
@@ -37,6 +39,11 @@
         </activity>
         <activity
             android:name=".ui.dashboard.DashboardActivity"
+            android:exported="false"
+            android:theme="@style/Theme.SmartApp" />
+
+        <activity
+            android:name=".ui.configuration.ConfigurationActivity"
             android:exported="false"
             android:theme="@style/Theme.SmartApp" />
         <activity

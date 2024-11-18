@@ -1,6 +1,7 @@
 package com.example.smartapp.ui.rooms
 
 import androidx.room.TypeConverter
+import com.example.smartapp.data.tables.Rooms
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 

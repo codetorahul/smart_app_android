@@ -5,17 +5,21 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import com.example.smartapp.data.dao.AppInfoDao
 import com.example.smartapp.data.dao.ApplianceDao
 import com.example.smartapp.data.dao.RoomDao
-import com.example.smartapp.ui.appliances.Appliances
+import com.example.smartapp.data.tables.AppInfo
+import com.example.smartapp.data.tables.Appliances
 import com.example.smartapp.ui.rooms.RoomListConverter
-import com.example.smartapp.ui.rooms.Rooms
+import com.example.smartapp.data.tables.Rooms
 
-@Database(entities = [Rooms::class, Appliances::class], version = 2, exportSchema = false)
+@Database(entities = [Rooms::class, Appliances::class, AppInfo::class], version = 3, exportSchema = false)
 @TypeConverters(RoomListConverter::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun roomDao(): RoomDao
     abstract fun applianceDao(): ApplianceDao
+    abstract fun appInfoDao(): AppInfoDao
+
 
 
     companion object {

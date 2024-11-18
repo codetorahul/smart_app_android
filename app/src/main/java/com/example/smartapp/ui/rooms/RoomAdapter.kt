@@ -1,14 +1,19 @@
 package com.example.smartapp.ui.rooms
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.smartapp.R
+import com.example.smartapp.data.tables.Rooms
 import com.example.smartapp.listener.ItemListener
+import com.example.smartapp.ui.configuration.ConfigurationActivity
 
-class RoomAdapter(private val itemList: List<Rooms>) :
+class RoomAdapter(private val context: Context,private val itemList: List<Rooms>) :
     RecyclerView.Adapter<RoomAdapter.ItemViewHolder>() {
 
         private var listener : ItemListener? = null
@@ -24,13 +29,21 @@ class RoomAdapter(private val itemList: List<Rooms>) :
 
     override fun onBindViewHolder(holder: ItemViewHolder, position: Int) {
         val currentItem = itemList[position]
+
+          if(!currentItem.isRoomIdUpdated) {
+              holder.clRoom.background = ContextCompat.getDrawable(context, R.drawable.background_disable)
+          }
+          else{
+              holder.clRoom.background = ContextCompat.getDrawable(context, R.drawable.background)
+          }
+
         holder.tvRoom.text = currentItem.roomName
 
         holder.itemView.setOnClickListener {
             listener?.onItemClick(currentItem)
         }
 
-        holder.itemView.setOnLongClickListener{
+        holder.itemView.setOnLongClickListener {
             listener?.onItemLongClick(currentItem)
             true
         }
@@ -41,5 +54,6 @@ class RoomAdapter(private val itemList: List<Rooms>) :
 
     class ItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val tvRoom: TextView = itemView.findViewById(R.id.tvRoom)
+        val clRoom: ConstraintLayout = itemView.findViewById(R.id.clRoot)
     }
 }

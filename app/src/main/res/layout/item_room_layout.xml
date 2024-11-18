@@ -7,13 +7,13 @@
     android:layout_margin="5dp"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:padding="30dp">
+    android:padding="30dp"
+    >
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/ivRoom"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        android:layout_marginStart="25dp"
         android:src="@drawable/room"
         app:layout_constraintBottom_toTopOf="@+id/tvRoom"
         app:layout_constraintEnd_toEndOf="parent"

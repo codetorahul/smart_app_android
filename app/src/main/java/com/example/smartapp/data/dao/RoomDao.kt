@@ -5,8 +5,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
-import com.example.smartapp.ui.appliances.Appliances
-import com.example.smartapp.ui.rooms.Rooms
+import com.example.smartapp.data.tables.Rooms
 
 @Dao
 interface RoomDao {
@@ -28,6 +27,8 @@ interface RoomDao {
     @Delete
     suspend fun deleteRoom(rooms: Rooms)
 
+    @Query("UPDATE rooms SET roomId = :newRoomId, isRoomIdUpdated= :isRoomUpdated WHERE _id = :oldRoomId")
+    suspend fun updateRoomIdAndItsStatus(oldRoomId: Int, newRoomId: String, isRoomUpdated: Boolean)
 
     @Update
     suspend fun updateRoom(rooms: Rooms)

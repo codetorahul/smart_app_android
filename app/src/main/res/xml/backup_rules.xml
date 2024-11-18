@@ -10,4 +10,10 @@
    <include domain="sharedpref" path="."/>
    <exclude domain="sharedpref" path="device.xml"/>
 -->
+
+    <!-- Backup shared preferences -->
+    <include domain="sharedpref" path="." />
+
+    <!-- Backup app's internal storage (files saved in the app) -->
+    <include domain="file" path="databases/" />
 </full-backup-content>

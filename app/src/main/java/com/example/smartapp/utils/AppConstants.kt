@@ -3,7 +3,7 @@ package com.example.smartapp.utils
 object AppConstants {
 
     const val THRESHOLD_ROOMS = 10
-    const val THRESHOLD_APPLIANCES = 10
+    const val THRESHOLD_APPLIANCES = 4
     const val DEMO_EMAIL= "abc@gmail.com"
     const val DEMO_PASSWORD= "123456"
 
@@ -24,15 +24,21 @@ object AppConstants {
     const val OPTION_RENAME = "optionRename"
 
     // Dialog options
-    const val OPTION_YES = "YES"
+    const val OPTION_SEND = "Send"
     const val OPTION_CANCEL = "cancel"
+
+    // Dialog type
+    const val DIALOG_LOCATION_ENABLE = "Location Enable Dialog"
+    const val DIALOG_WIFI_INFO = "Wifi Info"
 
     // Socket
     // for testing
     // const val WEB_SOCKET_URL = "ws://192.168.0.199:8080"
 
-    //const val WEB_SOCKET_URL = "ws://10.0.2.2:8080"
-    const val WEB_SOCKET_URL = "ws://192.168.4.1:8080"
+    const val WEB_SOCKET_URL = "ws://10.0.2.2:8080"
+
+    // uncomment below code
+    //const val WEB_SOCKET_URL = "ws://192.168.4.1:8080"
     //   const val SOCKET_URL = "http://10.0.2.2:8000"
     //  const val SOCKET_URL = "http://192.168.4.1:8080"
 
@@ -48,6 +54,13 @@ object AppConstants {
 
     const val CONNECTION_SUCCESS = "Connection Success"
     const val CONNECTION_FAILED = "Connection Failed"
+
+    const val IS_CONFIGURED = "IsConfigured"
+
+    // Mode
+    const val MODE_CONFIGURETION = "ConfigureMode"
+    const val MODE_CONNECTION = "Connection"
+
 
 
 

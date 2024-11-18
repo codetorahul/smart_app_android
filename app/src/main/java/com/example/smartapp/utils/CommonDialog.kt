@@ -14,10 +14,9 @@ import com.example.smartapp.listener.OptionSelectListener
 import com.example.smartapp.ui.login.LoginActivity
 import com.example.smartapp.utils.AppConstants.OPTION_DELETE
 import com.example.smartapp.utils.AppConstants.OPTION_RENAME
-import com.example.smartapp.utils.AppConstants.OPTION_YES
 
 fun showEditTextDialog(context: Context, positiveButton: String = "ADD", title: String,
-                       nameToUpdate: String = "", typeOfDialog : String,  taskToPerform: (name : String) -> Unit) {
+                       nameToUpdate: String = "", typeOfDialog : String, taskToPerformOnCancel: (()-> Unit)? =  null,   taskToPerform: (name : String) -> Unit) {
     val inflater = LayoutInflater.from(context)
     val dialogView = inflater.inflate(R.layout.dialog_add, null)
     val editText = dialogView.findViewById<EditText>(R.id.etName)
@@ -44,7 +43,12 @@ fun showEditTextDialog(context: Context, positiveButton: String = "ADD", title: 
             taskToPerform(editText.text.toString().trim())
             
         }
-        .setNegativeButton("CANCEL", null)
+        .setNegativeButton("CANCEL"){_,_->
+
+            taskToPerformOnCancel?.let {
+                it()
+            }
+        }
 
     // Show the dialog
     dialogBuilder.create().show()

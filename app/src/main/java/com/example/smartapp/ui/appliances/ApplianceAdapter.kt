@@ -1,9 +1,6 @@
 package com.example.smartapp.ui.appliances
 
-import android.R.attr.bottom
-import android.R.attr.left
-import android.R.attr.right
-import android.R.attr.top
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,12 +9,16 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.widget.SwitchCompat
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.smartapp.R
+import com.example.smartapp.data.tables.Appliances
 import com.example.smartapp.listener.ItemListener
+import com.example.smartapp.ui.configuration.ConfigurationActivity
 
 
-class ApplianceAdapter(private val itemList: List<Appliances>) :
+class ApplianceAdapter(private val context: Context,private val itemList: List<Appliances>, private val isRoomIdUpdated: Boolean,private val screenType: String) :
     RecyclerView.Adapter<ApplianceAdapter.ItemViewHolder>() {
 
         private var listener : ItemListener? = null
@@ -34,6 +35,31 @@ class ApplianceAdapter(private val itemList: List<Appliances>) :
 
     override fun onBindViewHolder(holder: ItemViewHolder, position: Int) {
         val currentItem = itemList[position]
+
+
+        holder.switchStatus.visibility =ViewGroup.VISIBLE
+
+        if(screenType == ConfigurationActivity.TAG) {
+
+            // In Configuration mode, no need to show toggle button
+            holder.switchStatus.visibility =ViewGroup.GONE
+
+            // Insertion or Rename can only work in Configuration mode
+            holder.itemView.setOnLongClickListener{
+                listener?.onItemLongClick(currentItem)
+                true
+            }
+        }
+
+            if(!isRoomIdUpdated) {
+                // Room is not configured , hence appliance can't be accessed.
+                holder.switchStatus.visibility =ViewGroup.GONE
+                holder.clRoom.background = ContextCompat.getDrawable(context, R.drawable.background_disable)
+            }
+            else{
+                holder.clRoom.background = ContextCompat.getDrawable(context, R.drawable.background)
+            }
+
         holder.tvName.text = currentItem.applianceName
 
         val lp = LinearLayout.LayoutParams(
@@ -50,21 +76,14 @@ class ApplianceAdapter(private val itemList: List<Appliances>) :
 
         holder.switchStatus.setOnCheckedChangeListener(null)
         holder.switchStatus.isChecked = currentItem.applianceStatus
-        holder.switchStatus.visibility =ViewGroup.VISIBLE
 
+
+        // User can only change status once room configured
         holder.switchStatus.setOnCheckedChangeListener{ _: CompoundButton, b: Boolean ->
-            listener?.onStatusChange(b, currentItem)
+            if(screenType != ConfigurationActivity.TAG && isRoomIdUpdated) {
+                    listener?.onStatusChange(b, currentItem)
+            }
         }
-
-        holder.itemView.setOnClickListener {
-            listener?.onItemClick(it)
-        }
-        holder.itemView.setOnLongClickListener{
-            listener?.onItemLongClick(currentItem)
-            true
-        }
-
-
     }
 
     override fun getItemCount(): Int = itemList.size
@@ -74,7 +93,7 @@ class ApplianceAdapter(private val itemList: List<Appliances>) :
         val tvName: TextView = itemView.findViewById(R.id.tvRoom)
         val tvStatus: TextView = itemView.findViewById(R.id.tvStatus)
         val switchStatus: SwitchCompat = itemView.findViewById(R.id.SwitchStatus)
-
+        val clRoom: ConstraintLayout = itemView.findViewById(R.id.clRoot)
 
 
     }
