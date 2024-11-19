@@ -65,6 +65,7 @@ class ConfigFragment : Fragment() {
                     menu.findItem(R.id.action_config_mode).isVisible = false
                     menu.findItem(R.id.action_logout).isVisible = false
                     menu.findItem(R.id.action_config).isVisible = false
+                    menu.findItem(R.id.action_reconnect_server).isVisible = false
                 }
             }
 
