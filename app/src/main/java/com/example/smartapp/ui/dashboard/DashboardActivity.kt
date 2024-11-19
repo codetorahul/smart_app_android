@@ -13,6 +13,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
+import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
@@ -26,9 +27,11 @@ import com.example.smartapp.listener.ItemAddListener
 import com.example.smartapp.socket.ServerHandler
 import com.example.smartapp.ui.ServerConnection
 import com.example.smartapp.ui.WifiConnection
+import com.example.smartapp.ui.appliances.AppliancesFragment
 import com.example.smartapp.ui.configuration.ConfigurationActivity
 import com.example.smartapp.ui.configuration.ConfigurationActivity.Companion
 import com.example.smartapp.ui.login.LoginActivity
+import com.example.smartapp.ui.rooms.RoomFragment
 import com.example.smartapp.ui.rooms.RoomFragmentDirections
 import com.example.smartapp.utils.AppConstants
 import com.example.smartapp.utils.AppConstants.CONNECTION_FAILED
@@ -227,7 +230,16 @@ class DashboardActivity : BaseActivity(), ItemAddListener {
             return true
         }
         else if (id == R.id.action_config) {
-            navController?.navigate(R.id.action_Room_to_Config)
+            val navHostFragment =
+                supportFragmentManager.findFragmentById(R.id.nav_host_fragment_content_dashboard) as NavHostFragment
+          val currentFragment = navHostFragment.childFragmentManager.fragments.lastOrNull()
+
+            if(currentFragment is RoomFragment) {
+                navController?.navigate(R.id.action_Room_to_Config)
+            }else if(currentFragment is AppliancesFragment){
+                navController?.navigate(R.id.action_appliances_to_Config)
+
+            }
             return true
         }
         else if (id == R.id.action_config_mode) {
