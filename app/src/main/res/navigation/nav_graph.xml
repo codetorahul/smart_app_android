@@ -35,6 +35,11 @@
         android:label="@string/second_fragment_label"
         tools:layout="@layout/fragment_appliance">
 
+
+        <action
+            android:id="@+id/action_appliances_to_Config"
+            app:destination="@id/ConfigFragment"
+            />
         <action  android:id="@+id/action_Appliance_to_ConnectionSetUp"
             app:destination="@id/ConnectionSetUpFragment"/>
 
