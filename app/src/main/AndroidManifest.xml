@@ -12,7 +12,7 @@
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
 
     <application
-        android:allowBackup="true"
+        android:allowBackup="false"
         android:fullBackupContent="@xml/backup_rules"
         android:backupAgent="android.app.backup.BackupAgentHelper"
         android:restoreAnyVersion="true"

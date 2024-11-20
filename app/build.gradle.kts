@@ -6,6 +6,7 @@ plugins {
     id("kotlin-kapt")
     id("com.google.gms.google-services")
     id("androidx.navigation.safeargs.kotlin")
+    id("com.google.firebase.crashlytics")
 
 }
 
@@ -67,6 +68,11 @@ dependencies {
     implementation ("androidx.room:room-ktx:2.6.1")
     kapt ("androidx.room:room-compiler:2.6.1")
 
+    // Import the BoM for the Firebase platform
+    implementation(platform("com.google.firebase:firebase-bom:33.6.0"))
+
+    implementation("com.google.firebase:firebase-crashlytics:19.2.1")
+    implementation("com.google.firebase:firebase-analytics:22.1.2")
 
 
 
