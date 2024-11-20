@@ -23,8 +23,9 @@ import com.example.smartapp.utils.AppConstants.OPTION_CANCEL
 import com.google.android.material.snackbar.Snackbar
 import java.net.URI
 
-
+const val showToast = false
 fun showToast(context: Context, message: String){
+   if(showToast)
     Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
 }
 
@@ -32,16 +33,13 @@ fun showSnackBar(context: Context, message: String){
     val view: View = (context as Activity).findViewById(R.id.content) // Get root view
     Snackbar.make(view, message, Snackbar.LENGTH_SHORT).show()
 }
-private val _globalLiveData = MutableLiveData<ConnectionModel>()
-val globalLiveData: LiveData<ConnectionModel> get() = _globalLiveData
+private val _globalLiveData = MutableLiveData<Event<ConnectionModel>>()
+val globalLiveData: LiveData<Event<ConnectionModel>> get() = _globalLiveData
 
-fun updateData(newData: ConnectionModel) {
-    _globalLiveData.value = newData
-}
 
 // Method to update LiveData from background thread
 fun updateDataInBackground(newData: ConnectionModel) {
-    _globalLiveData.postValue(newData)
+    _globalLiveData.postValue(Event(newData))
 }
 
 
@@ -182,10 +180,10 @@ fun showCustomDialog(activityObj: Activity, message: String,
 }
  fun getRoomId(it: Rooms): String {
     return if(it.isRoomIdUpdated){
-        println(">>>>>> ROOM ID UPDATED..SO RoomId:  ${it.roomId}")
+      //  println(">>>>>> ROOM ID UPDATED..SO RoomId:  ${it.roomId}")
         it.roomId
     }else {
-        println(">>>>>> Normal Combination Id:  ${it.roomId + it._id}")
+       // println(">>>>>> Normal Combination Id:  ${it.roomId + it._id}")
         it.roomId + it._id
 
     }
