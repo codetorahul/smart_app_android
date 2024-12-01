@@ -89,24 +89,26 @@ class DashboardActivity : BaseActivity(), ItemAddListener {
 
     private fun manageLiveData() {
 
-        globalLiveData.observe(this){
-            hideProgressBar()
-            if( it.connectionStatus == CONNECTION_SUCCESS){
-                isConnected = true
-                showSnackBar(this@DashboardActivity, "Connected to Server")
+        globalLiveData.observe(this) { event ->
+            event.getContentIfNotHandled()?.let { connectionModel ->
+                hideProgressBar()
+                if (connectionModel.connectionStatus == CONNECTION_SUCCESS) {
+                    isConnected = true
+                    showSnackBar(this@DashboardActivity, "Connected to Server")
 
-            }else if (it.connectionStatus == CONNECTION_FAILED){
-                wifiConnection.dismissDialog()
-                if(!isConnected){
-                    showSnackBar(this@DashboardActivity, "It seems server is not running.")
+                } else if (connectionModel.connectionStatus == CONNECTION_FAILED) {
+                    wifiConnection.dismissDialog()
+                    if (!isConnected) {
+                        showSnackBar(this@DashboardActivity, "It seems server is not running.")
 
-                }else{
-                    showSnackBar(this@DashboardActivity, "Dis-Connected from Server")
+                    } else {
+                        showSnackBar(this@DashboardActivity, "Dis-Connected from Server")
+                    }
+
+                    isConnected = false
                 }
-
-                isConnected= false
+                invalidateOptionsMenu()
             }
-            invalidateOptionsMenu()
         }
     }
 
@@ -288,7 +290,7 @@ class DashboardActivity : BaseActivity(), ItemAddListener {
                 wifiConnection.scanWifiNetworks()
             } else {
                 // Permission denied
-                Toast.makeText(applicationContext, "Location permission is required to scan Wi-Fi networks", Toast.LENGTH_SHORT).show()
+                showToast(applicationContext, "Location permission is required to scan Wi-Fi networks")
             }
         }
     }
