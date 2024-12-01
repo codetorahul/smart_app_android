@@ -93,41 +93,56 @@ class ConnectionSetUpFragment : Fragment(), DialogListener {
     }
 
     private fun setLiveData() {
-        globalLiveData.observe(viewLifecycleOwner){
-            if( it.connectionStatus == CONNECTION_SUCCESS){
-                isConnected = true
-               try {
-                   //TODO: Below code is for testing. UNComment and Use.
-                  // fetchedMacAddress = Integer.parseInt(it.receivedMacAddress).toString()
+        globalLiveData.observe(viewLifecycleOwner){ event ->
 
-                   // TODO: Comment below code if you want to use above code .
-                   fetchedMacAddress = it.receivedMacAddress
-               }catch (error:Error){
+            event.getContentIfNotHandled()?.let { connectionModel ->
 
-               }
-                showToast(requireContext().applicationContext, "Connected to Server")
-                if(checkLocation(context as Activity, this) && !IS_CONNECTED_TO_DEVICE_HOTSPOT) {
-                    requestLocationPermission()
-                }
-            }else if (it.connectionStatus == CONNECTION_FAILED){
-                hideProgressBar()
-                wifiConnection?.dismissDialog()
-                if(!isConnected){
-                    (context as Activity).runOnUiThread {
-                        showToast(requireContext().applicationContext, "It seems server is not running.")
+                if (connectionModel.connectionStatus == CONNECTION_SUCCESS) {
+                    isConnected = true
+                    try {
+                        //TODO: Below code is for testing. UNComment and Use.
+                        // fetchedMacAddress = Integer.parseInt(connectionModel.receivedMacAddress).toString()
+
+                        // TODO: Comment below code if you want to use above code .
+                        fetchedMacAddress = connectionModel.receivedMacAddress
+                    } catch (error: Error) {
+
                     }
-                }else{
-                    (context as Activity).runOnUiThread {
-                        showToast(requireContext().applicationContext, "Dis-Connected from Server")
+                    showToast(requireContext().applicationContext, "Connected to Server")
+                    if (checkLocation(
+                            context as Activity,
+                            this
+                        ) && !IS_CONNECTED_TO_DEVICE_HOTSPOT
+                    ) {
+                        requestLocationPermission()
                     }
-                }
+                } else if (connectionModel.connectionStatus == CONNECTION_FAILED) {
+                    hideProgressBar()
+                    wifiConnection?.dismissDialog()
+                    if (!isConnected) {
+                        (context as Activity).runOnUiThread {
+                            showToast(
+                                requireContext().applicationContext,
+                                "It seems server is not running."
+                            )
+                        }
+                    } else {
+                        (context as Activity).runOnUiThread {
+                            showToast(
+                                requireContext().applicationContext,
+                                "Dis-Connected from Server"
+                            )
+                        }
+                    }
 
-                // code for testing only
-                /*  if(checkLocation(this, this)) {
+                    // code for testing only
+                    /*  if(checkLocation(this, this)) {
                       requestLocationPermission()
                   }*/
 
-                isConnected= false
+                    isConnected = false
+                }
+
             }
         }
     }
@@ -211,7 +226,7 @@ class ConnectionSetUpFragment : Fragment(), DialogListener {
                    val oldRoomId = room.roomId
                    room.roomId = fetchedMacAddress!!
                    room.isMacAddressAdded = true
-                   println(">>>>>> ROOM-NAME: ${room.roomName} OLD-ROOM-ID:${oldRoomId.trim()} , NEW-ID: ${fetchedMacAddress} ")
+               //    println(">>>>>> ROOM-NAME: ${room.roomName} OLD-ROOM-ID:${oldRoomId.trim()} , NEW-ID: ${fetchedMacAddress} ")
 
                    roomListToPopulate.add(room)
                    updateRoomListInDB(fetchedMacAddress!!, oldRoomId)
@@ -237,6 +252,7 @@ class ConnectionSetUpFragment : Fragment(), DialogListener {
                 arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
                 123)
         }else{
+            println("@@@ PERMISSION: If user already Permission ")
             wifiConnection?.scanWifiNetworks()
         }
     }
@@ -246,10 +262,12 @@ class ConnectionSetUpFragment : Fragment(), DialogListener {
         if (requestCode == 123) {
             if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
                 // Permission granted, now you can scan for Wi-Fi networks
+                println("@@@ PERMISSION: If Permission Granted. ")
+
                 wifiConnection?.scanWifiNetworks()
             } else {
                 // Permission denied
-                Toast.makeText(requireContext().applicationContext, "Location permission is required to scan Wi-Fi networks", Toast.LENGTH_SHORT).show()
+                showToast(requireContext().applicationContext, "Location permission is required to scan Wi-Fi networks")
             }
         }
     }
