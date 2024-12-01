@@ -1,8 +1,9 @@
 {
   "project_info": {
     "project_number": "645200966000",
+    "firebase_url": "https://smart-app-c2461-default-rtdb.firebaseio.com",
     "project_id": "smart-app-c2461",
-    "storage_bucket": "smart-app-c2461.appspot.com"
+    "storage_bucket": "smart-app-c2461.firebasestorage.app"
   },
   "client": [
     {
