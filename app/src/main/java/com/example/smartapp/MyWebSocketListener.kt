@@ -5,7 +5,6 @@ import com.example.smartapp.socket.SocketMessageModel
 import com.example.smartapp.utils.AppConstants
 import com.example.smartapp.utils.AppConstants.CONNECTION_FAILED
 import com.example.smartapp.utils.AppConstants.CONNECTION_SUCCESS
-import com.example.smartapp.utils.updateData
 import com.example.smartapp.utils.updateDataInBackground
 import com.google.gson.Gson
 import okhttp3.WebSocket
@@ -13,6 +12,8 @@ import okhttp3.WebSocketListener
 import okhttp3.Response
 import okio.ByteString
 
+
+ var preReceivedText = ""
 class   MyWebSocketListener : WebSocketListener() {
     override fun onOpen(webSocket: WebSocket, response: Response) {
         // WebSocket connection is opened
@@ -27,7 +28,10 @@ class   MyWebSocketListener : WebSocketListener() {
     override fun onMessage(webSocket: WebSocket, text: String) {
         // Message received from the server
         println(">>> WEBSOCKET- Message Received : $text")
-        updateDataInBackground(ConnectionModel(CONNECTION_SUCCESS,text))
+        if(preReceivedText != text) {
+            updateDataInBackground(ConnectionModel(CONNECTION_SUCCESS, text))
+            preReceivedText = text
+        }
 
     }
 
@@ -47,7 +51,7 @@ class   MyWebSocketListener : WebSocketListener() {
         updateDataInBackground(ConnectionModel(CONNECTION_FAILED,""))
 
         t.printStackTrace()
-        println(">>> WEBSOCKET- Failed : ${t.printStackTrace()}")
+        println(">>> WEBSOCKET- Failed : ${t.message}")
 
     }
 }
