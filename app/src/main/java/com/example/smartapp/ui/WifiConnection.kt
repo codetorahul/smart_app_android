@@ -56,11 +56,11 @@ class WifiConnection(val context: Context) {
                     }
                     println("::::::::: WIFI FETCHED")
                     showToast(context.applicationContext, "::::::::: WIFI FETCHED")
-                    getScanResults(wifiManager.scanResults)
                     context.unregisterReceiver(this)
+                    getScanResults(wifiManager.scanResults)
                 } else {
                     // Scan failed
-                    Toast.makeText(context!!.applicationContext, "Wi-Fi scan failed", Toast.LENGTH_SHORT).show()
+                    showToast(context!!.applicationContext, "Wi-Fi scan failed")
                 }
             }
         }
@@ -78,7 +78,7 @@ class WifiConnection(val context: Context) {
             }else{
 
                 // Scan failed
-                Toast.makeText(context, "Wi-Fi scan failed to start", Toast.LENGTH_SHORT).show()
+                showToast(context, "Wi-Fi scan failed to start")
             }
         }
     }
@@ -100,6 +100,8 @@ class WifiConnection(val context: Context) {
     }
 
     private fun showDialogOfWifiList(wifiList: List<String>, scanResults: List<ScanResult>) {
+    if(alertBuilder ==null) {
+
         val builder = AlertDialog.Builder(context)
         builder.setCancelable(false)
         builder.setTitle("Available Wi-Fi Networks")
@@ -115,24 +117,28 @@ class WifiConnection(val context: Context) {
                 typeOfDialog = WIFI_PASSWORD,
                 taskToPerformOnCancel = { hideProgressBar() }
 
-            ){
+            ) {
                 val password = it
 
                 val data = SocketMessageModel(
                     type = AppConstants.TYPE_WIFI_INFO,
                     ssdId = selectedNetwork.SSID,
-                    password = password)
+                    password = password
+                )
 
                 dialogListener?.onOptionClick(OPTION_SEND, data, DIALOG_WIFI_INFO)
+                dismissDialog()
             }
         }
 
         alertBuilder = builder.create()
         alertBuilder!!.show()
     }
+    }
 
     fun dismissDialog() {
         alertBuilder?.dismiss()
+        alertBuilder = null
     }
 
 
