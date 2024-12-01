@@ -44,7 +44,7 @@ class ServerConnection(val context: Context): DialogListener {
         val ipAddress =  getWifiIpAddress(context)
         println(">>>> Fetched- IP Address: $ipAddress")
 
-        ipAddress?.let {
+        if(ipAddress !=null && ipAddress != "0.0.0.0") {
             // We are modifying our default SOCKET URL tp Pure ip address like '192.168.4.1'.
             var socketUrl =  AppConstants.SOCKET_URL.replace("ws://","")
             socketUrl =  socketUrl.replace("http://","")
